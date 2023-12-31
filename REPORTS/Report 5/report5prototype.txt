@@ -1,0 +1,26 @@
+SQL> set linesize 360
+SQL> set pagesize 66
+SQL> 
+SQL> rem 5th REPORT
+SQL> rem Show the products ordered by each customer
+SQL> rem The customer number starting 1 to 7 now
+SQL> Break ON customerid
+SQL> select DISTINCT customerid, title
+  2  from tbm_customer join tbm_order o using(customerid)
+  3  	     join tbm_order_item using(orderid)
+  4  	     join tbm_product using(productid)
+  5  where customerid = '&customer_id';
+Enter value for customer_id: 4
+old   5: where customerid = '&customer_id'
+new   5: where customerid = '4'
+
+CUSTOMERID TITLE                                                                                                                                                                                                                                                                                                                                                        
+---------- --------------------------------------------------                                                                                                                                                                                                                                                                                                           
+         4 Sony PlayStation 5                                                                                                                                                                                                                                                                                                                                           
+           Samsung 65" QLED TV                                                                                                                                                                                                                                                                                                                                          
+           iPhone 12                                                                                                                                                                                                                                                                                                                                                    
+           Amazon Kindle Paperwhite                                                                                                                                                                                                                                                                                                                                     
+
+SQL> clear breaks
+SQL> 
+SQL> spool off

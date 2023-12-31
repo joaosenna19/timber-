@@ -1,0 +1,27 @@
+SQL> set linesize 360
+SQL> set pagesize 66
+SQL> 
+SQL> rem Report6
+SQL> rem Show total number of products orders and order items, and Total value of all orders by each supplier
+SQL> column 'Supplier Name' format A25
+SQL> column 'Value of all orders' format A20
+SQL> column 'Total value of all orders' format A25
+SQL> select name "Supplier Name", count(title) "Total Number of product's orders",
+  2  	     sum(oi.quantity) "Total Number of ordered items",
+  3  	     to_char(sum(oi.quantity*p.price), '$9,990.00') "Total value of all orders"
+  4  from tbm_supplier join tbm_product_demand pd using(supplierid)
+  5  	     join tbm_product p using(productid)
+  6  	     join tbm_order_item oi using(productid)
+  7  	     join tbm_order using(orderid)
+  8  group by name;
+
+Supplier Name             Total Number of product's orders Total Number of ordered items Total value of all orders                                                                                                                                                                                                                                                      
+------------------------- -------------------------------- ----------------------------- -------------------------                                                                                                                                                                                                                                                      
+ABC Corporation                                          3                             3  $2,999.97                                                                                                                                                                                                                                                                     
+XYZ Enterprises                                          5                             6  $4,899.94                                                                                                                                                                                                                                                                     
+Global Suppliers Ltd                                     4                             5  $3,999.95                                                                                                                                                                                                                                                                     
+MegaCorp Industries                                      5                             6  $4,899.94                                                                                                                                                                                                                                                                     
+
+SQL> clear columns
+SQL> 
+SQL> spool off

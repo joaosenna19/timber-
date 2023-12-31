@@ -1,0 +1,53 @@
+SQL> SET linesize 350
+SQL> SET pagesize 66
+SQL> 
+SQL> REM SET language to english to avoid problems with non-english machines
+SQL> alter session set NLS_LANGUAGE = ENGLISH;
+
+Session altered.
+
+SQL> rem set date format for 11g
+SQL> alter session set NLS_DATE_FORMAT='dd-mon-yy';
+
+Session altered.
+
+SQL> 
+SQL> 
+SQL> REM 2ND REPORT
+SQL> REM DISPLAY ALL CATEGORIES AND SUBCATEGORIES AND EACH PRODUCT PER Category
+SQL> REM QUERY USES JOIN, SORTING AND GROUP FUNCTION
+SQL> BREAK ON 'Category'
+SQL> SELECT c.name "Category", p.title "Product"
+  2  FROM tbm_category c
+  3  JOIN tbm_product p ON c.categoryid = p.category
+  4  GROUP BY c.name, p.title
+  5  ORDER BY c.name;
+
+Category                                           Product                                                                                                                                                                                                                                                                                                    
+-------------------------------------------------- --------------------------------------------------                                                                                                                                                                                                                                                         
+Books                                              Amazon Kindle Paperwhite                                                                                                                                                                                                                                                                                   
+Electronics                                        Amazon Echo Dot                                                                                                                                                                                                                                                                                            
+                                                   Canon EOS 5D Mark IV                                                                                                                                                                                                                                                                                       
+                                                   Canon EOS Rebel T7i                                                                                                                                                                                                                                                                                        
+                                                   Fitbit Charge 4                                                                                                                                                                                                                                                                                            
+                                                   Fitbit Versa 3                                                                                                                                                                                                                                                                                             
+                                                   LG 55" 4K Smart TV                                                                                                                                                                                                                                                                                         
+                                                   Nintendo Switch                                                                                                                                                                                                                                                                                            
+                                                   Samsung 65" QLED TV                                                                                                                                                                                                                                                                                        
+                                                   Sony PlayStation 5                                                                                                                                                                                                                                                                                         
+                                                   Sony WH-1000XM4                                                                                                                                                                                                                                                                                            
+                                                   Sony WH-CH710N                                                                                                                                                                                                                                                                                             
+Laptops                                            Apple MacBook Pro                                                                                                                                                                                                                                                                                          
+                                                   Dell XPS 13                                                                                                                                                                                                                                                                                                
+                                                   Samsung Galaxy Tab S7                                                                                                                                                                                                                                                                                      
+Men Clothing                                       Adidas Superstar                                                                                                                                                                                                                                                                                           
+                                                   Nike Air Max 270                                                                                                                                                                                                                                                                                           
+Mobile Phones                                      Samsung Galaxy S21                                                                                                                                                                                                                                                                                         
+                                                   iPhone 12                                                                                                                                                                                                                                                                                                  
+Women Clothing                                     Adidas Ultraboost                                                                                                                                                                                                                                                                                          
+
+20 rows selected.
+
+SQL> CLEAR BREAKS
+SQL> 
+SQL> SPOOL OFF

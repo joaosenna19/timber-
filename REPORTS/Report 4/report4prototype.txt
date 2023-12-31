@@ -1,0 +1,43 @@
+SQL> SET linesize 350
+SQL> SET pagesize 66
+SQL> 
+SQL> REM SET language to english to avoid problems with non-english machines
+SQL> alter session set NLS_LANGUAGE = ENGLISH;
+
+Session altered.
+
+SQL> rem set date format for 11g
+SQL> alter session set NLS_DATE_FORMAT='dd-mon-yy';
+
+Session altered.
+
+SQL> 
+SQL> REM 4TH REPORT
+SQL> REM DISPLAY ALL CUSTOMERS AND THEIR TOTAL OF ORDERS AND AMOUNT OF THE ORDERS
+SQL> REM QUERY USES SINGLE ROW, GROUP FUNCTIONS, JOIN AND OLAP
+SQL> SELECT UNIQUE CASE WHEN c.customerid IS NULL THEN 'Total'
+  2  		       ELSE TO_CHAR(c.customerid)
+  3  		  END AS "Customer",
+  4  	    COUNT(o.orderid) AS "Number of orders",
+  5  	    SUM(NVL(p.price * oi.quantity, 0)) "Amount"
+  6  FROM tbm_customer c
+  7  LEFT JOIN tbm_order o ON c.customerid = o.customerid
+  8  LEFT JOIN tbm_order_item oi ON o.orderid = oi.orderid
+  9  LEFT JOIN tbm_product p ON oi.productid = p.productid
+ 10  GROUP BY ROLLUP(c.customerid);
+
+Customer                                 Number of orders     Amount                                                                                                                                                                                                                                                                                          
+---------------------------------------- ---------------- ----------                                                                                                                                                                                                                                                                                          
+1                                                       4    2699.95                                                                                                                                                                                                                                                                                          
+4                                                       4    3759.94                                                                                                                                                                                                                                                                                          
+2                                                       3    2999.97                                                                                                                                                                                                                                                                                          
+3                                                       2    2149.98                                                                                                                                                                                                                                                                                          
+6                                                       0          0                                                                                                                                                                                                                                                                                          
+7                                                       0          0                                                                                                                                                                                                                                                                                          
+5                                                       0          0                                                                                                                                                                                                                                                                                          
+Total                                                  13   11609.84                                                                                                                                                                                                                                                                                          
+
+8 rows selected.
+
+SQL> 
+SQL> SPOOL OFF

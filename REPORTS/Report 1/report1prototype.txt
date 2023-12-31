@@ -1,0 +1,41 @@
+SQL> SET linesize 350
+SQL> SET pagesize 66
+SQL> 
+SQL> REM SET language to english to avoid problems with non-english machines
+SQL> alter session set NLS_LANGUAGE = ENGLISH;
+
+Session altered.
+
+SQL> rem set date format for 11g
+SQL> alter session set NLS_DATE_FORMAT='dd-mon-yy';
+
+Session altered.
+
+SQL> 
+SQL> 
+SQL> REM 1ST REPORT
+SQL> REM USER CAN INPUT A PRODUCT ID AND SEE ALL REVIEWS FOR A SPECIFIC PRODUCT
+SQL> REM QUERY USES SORTING, JOIN AND USER INPUT
+SQL> COLUMN 'Product' FORMAT A25
+SQL> COLUMN 'Comments' FORMAT A50
+SQL> COLUMN 'Rating' FORMAT 9999
+SQL> BREAK ON 'Product'
+SQL> SELECT p.title "Product", pr.rating "Rating", pr.comments "Comments"
+  2  FROM tbm_product_review pr
+  3  JOIN tbm_product p ON pr.productid = p.productid
+  4  WHERE pr.productid = '&productid'
+  5  ORDER BY p.title, pr.rating;
+Enter value for productid: 1
+old   4: WHERE pr.productid = '&productid'
+new   4: WHERE pr.productid = '1'
+
+Product                   Rating Comments                                                                                                                                                                                                                                                                                                                     
+------------------------- ------ --------------------------------------------------                                                                                                                                                                                                                                                                           
+iPhone 12                      3 Decent phone, nice colors.                                                                                                                                                                                                                                                                                                   
+                               4 Great phone, excellent camera quality.                                                                                                                                                                                                                                                                                       
+                               5 I am so happy that I purchased this phone!                                                                                                                                                                                                                                                                                   
+
+SQL> CLEAR COLUMNS
+SQL> CLEAR BREAKS
+SQL> 
+SQL> SPOOL OFF

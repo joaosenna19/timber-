@@ -1,0 +1,23 @@
+SQL> set linesize 360
+SQL> set pagesize 66
+SQL> 
+SQL> rem Report7
+SQL> rem Which customer_id ordered the same product as those who ordered in Alberta?
+SQL> select customerid, title, province
+  2  from tbm_customer join tbm_order using(customerid)
+  3  	     join tbm_order_item using(orderid)
+  4  	     join tbm_product using(productid)
+  5  where province != 'AB'
+  6  	     and title in
+  7  		     (select title
+  8  		     from tbm_customer join tbm_order using(customerid)
+  9  			     join tbm_order_item using(orderid)
+ 10  			     join tbm_product using(productid)
+ 11  		     where province = 'AB');
+
+CUSTOMERID TITLE                                              PR                                                                                                                                                                                                                                                                                                        
+---------- -------------------------------------------------- --                                                                                                                                                                                                                                                                                                        
+         4 Samsung 65" QLED TV                                QC                                                                                                                                                                                                                                                                                                        
+
+SQL> 
+SQL> spool off

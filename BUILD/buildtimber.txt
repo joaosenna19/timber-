@@ -1,0 +1,186 @@
+SQL> 
+SQL> REM SET language to english to avoid problems with non-english machines
+SQL> alter session set NLS_LANGUAGE = ENGLISH;
+
+Session altered.
+
+SQL> 
+SQL> DROP TABLE tbm_tax CASCADE CONSTRAINTS;
+
+Table dropped.
+
+SQL> DROP TABLE tbm_shipping_rate CASCADE CONSTRAINTS;
+
+Table dropped.
+
+SQL> DROP TABLE tbm_product_review CASCADE CONSTRAINTS;
+
+Table dropped.
+
+SQL> DROP TABLE tbm_product_demand CASCADE CONSTRAINTS;
+
+Table dropped.
+
+SQL> DROP TABLE tbm_order_item CASCADE CONSTRAINTS;
+
+Table dropped.
+
+SQL> DROP TABLE tbm_product CASCADE CONSTRAINTS;
+
+Table dropped.
+
+SQL> DROP TABLE tbm_customer CASCADE CONSTRAINTS;
+
+Table dropped.
+
+SQL> DROP TABLE tbm_order CASCADE CONSTRAINTS;
+
+Table dropped.
+
+SQL> DROP TABLE tbm_category CASCADE CONSTRAINTS;
+
+Table dropped.
+
+SQL> DROP TABLE tbm_supplier CASCADE CONSTRAINTS;
+
+Table dropped.
+
+SQL> 
+SQL> REM Create table with column-level constraints
+SQL> 
+SQL> CREATE TABLE tbm_tax (
+  2  	 taxid NUMBER CONSTRAINT SYS_TAX_PK PRIMARY KEY,
+  3  	 gst FLOAT,
+  4  	 pst FLOAT,
+  5  	 hst FLOAT
+  6  );
+
+Table created.
+
+SQL> 
+SQL> CREATE TABLE tbm_shipping_rate (
+  2  	 shippingrateid NUMBER CONSTRAINT SYS_SHIPRT_PK PRIMARY KEY,
+  3  	 weightmin FLOAT CONSTRAINT SYS_SHIPRT__WEIGHT_MIN_CK
+  4  	 CHECK (weightmin > 0),
+  5  	 weightmax FLOAT,
+  6  	 shippingcost FLOAT
+  7  );
+
+Table created.
+
+SQL> 
+SQL> CREATE TABLE tbm_customer (
+  2  	 customerid NUMBER CONSTRAINT SYS_CUSTOMER_PK PRIMARY KEY,
+  3  	 phonenumber CHAR(12) CONSTRAINT SYS_CUSTOMER_PHONE_NUMBER_CK
+  4  	 CHECK ( REGEXP_LIKE (phonenumber, '[1-9]([0-9]){2}[.]([0-9]){3}[.]([0-9]){4}')),
+  5  	 addressstreet VARCHAR2(50),
+  6  	 addressnumber NUMBER,
+  7  	 city VARCHAR2(50) NOT NULL,
+  8  	 province CHAR(2) CONSTRAINT SYS_CUSTOMER_PROV_CK CHECK (UPPER(province) IN ('AB',
+  9  	'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC',
+ 10  	'SK', 'YT')),
+ 11  	postalcode CHAR(6) CONSTRAINT SYS_CUSTOMER_POSTAL_CODE_CK CHECK (REGEXP_LIKE (postalcode, '([A-Z][0-9]){3}')),
+ 12  	emailaddress VARCHAR(50) CONSTRAINT SYS_CUSTOMER_EMAIL_UK UNIQUE
+ 13  	CONSTRAINT SYS_CUSTOMER_EMAIL_CK
+ 14  	CHECK (REGEXP_LIKE (emailaddress, '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')),
+ 15  	istimbermember NUMBER(1) CONSTRAINT SYS_CUSTOMER_IS_MEMBER_CK CHECK (istimbermember IN (0,1))
+ 16  );
+
+Table created.
+
+SQL> 
+SQL> CREATE TABLE tbm_supplier(
+  2  	 supplierid NUMBER CONSTRAINT SYS_SUPPLIER_PK PRIMARY KEY,
+  3  	 name VARCHAR2(50) NOT NULL,
+  4  	 emailaddress VARCHAR2(50) CONSTRAINT SYS_SUPPLIER_EMAIL_CK CHECK (REGEXP_LIKE (emailaddress, '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')),
+  5  	 city VARCHAR2(50) NOT NULL,
+  6  	 province CHAR(2) CONSTRAINT SYS_SUPPLIER_PROV_CK CHECK(province IN ('AB', 'ON', 'BC', 'QC', 'NB', 'MB', 'SK', 'PE', 'NL', 'NS', 'NU', 'YT', 'NT'))
+  7  	 );
+
+Table created.
+
+SQL> 
+SQL> CREATE TABLE tbm_order (
+  2  	 orderid NUMBER CONSTRAINT SYS_ORDER_PK PRIMARY KEY,
+  3  	 orderdate DATE,
+  4  	 estimateddate DATE,
+  5  	 shippingprovince CHAR(2) CONSTRAINT SYS_ORDER_SHIPP_PROVINCE_CK CHECK (UPPER(shippingprovince) IN ('AB',
+  6  	'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC',
+  7  	'SK', 'YT')),
+  8  	customerid NUMBER,
+  9  	CONSTRAINT SYS_CUSTOMER_ORDER_FK FOREIGN KEY (customerid) REFERENCES tbm_customer(customerid),
+ 10  	taxid NUMBER,
+ 11  	 CONSTRAINT SYS_TAX_ORDER_FK FOREIGN KEY (taxid) REFERENCES tbm_tax(taxid),
+ 12  	shippingrateid NUMBER,
+ 13  	CONSTRAINT SYS_SHIPRT_ORDER_FK FOREIGN KEY (shippingrateid) REFERENCES tbm_shipping_rate(shippingrateid),
+ 14  	CONSTRAINT SYS_ORDER_EST_DATE_CK CHECK (estimateddate >= orderdate)
+ 15  );
+
+Table created.
+
+SQL> 
+SQL> CREATE TABLE tbm_category (
+  2  	 categoryid NUMBER CONSTRAINT SYS_CATEGORY_PK PRIMARY KEY,
+  3  	 name VARCHAR2(50) NOT NULL,
+  4  	 parentcategory NUMBER,
+  5  	 CONSTRAINT SYS_CATEGORY_CATEGORY_FK FOREIGN KEY (parentcategory) REFERENCES tbm_category(categoryid)
+  6  );
+
+Table created.
+
+SQL> 
+SQL> CREATE TABLE tbm_product (
+  2  	 productid NUMBER CONSTRAINT SYS_PRODUCT_PK PRIMARY KEY,
+  3  	 title VARCHAR2(50),
+  4  	 description VARCHAR2(100),
+  5  	 price FLOAT CONSTRAINT SYS_PRODUCT_PRICE_CK CHECK (price > 0),
+  6  	 weight FLOAT CONSTRAINT SYS_PRODUCT_WEIGHT_CK CHECK (weight > 0),
+  7  	 taxexempt NUMBER(1) CONSTRAINT SYS_PRODUCT_TAX_EXEMPT_CK CHECK (taxexempt in (0,1)),
+  8  	 category NUMBER NOT NULL,
+  9  	 CONSTRAINT SYS_CATEGORY_PRODUCT_FK FOREIGN KEY (category) REFERENCES tbm_category(categoryid)
+ 10  );
+
+Table created.
+
+SQL> 
+SQL> CREATE TABLE tbm_product_demand(
+  2  	 supplierid NUMBER,
+  3  	 productid NUMBER,
+  4  	 quantity NUMBER CONSTRAINT SYS_PRODUCT_DEMAND_QUANTITY_CK CHECK(quantity >= 0),
+  5  	 estimated_delivery NUMBER(3) CONSTRAINT SYS_PRODUCT_DEMAND_EST_DELIVERY_CK CHECK(estimated_delivery >= 0),
+  6  	 CONSTRAINT SYS_ORDER_PRODUCT_DEMAND_PK PRIMARY KEY (supplierid, productid),
+  7  	 CONSTRAINT SYS_SUPPLIER_SUPPLIER_FK FOREIGN KEY(supplierid) REFERENCES tbm_supplier(supplierid),
+  8  	 CONSTRAINT SYS_PRODUCT_ID_FK FOREIGN KEY(productid) REFERENCES tbm_product(productid)
+  9  );
+
+Table created.
+
+SQL> 
+SQL> 
+SQL> CREATE TABLE tbm_product_review(
+  2  	 productreviewid NUMBER CONSTRAINT SYS_PRODUCT_REVIEW_PK PRIMARY KEY,
+  3  	 rating NUMBER(1) CONSTRAINT SYS_RATING_CK CHECK(rating in (1, 2, 3, 4, 5)),
+  4  	 comments VARCHAR2(100),
+  5  	 dateofreview DATE,
+  6  	 customerid NUMBER NOT NULL,
+  7  	 productid NUMBER NOT NULL,
+  8  	 CONSTRAINT SYS_CUSTOMER_CUSTOMER_FK FOREIGN KEY(customerid) REFERENCES tbm_customer(customerid),
+  9  	 CONSTRAINT SYS_PRODUCT_PRODUCT_FK FOREIGN KEY(productid) REFERENCES tbm_product(productid)
+ 10  );
+
+Table created.
+
+SQL> 
+SQL> CREATE TABLE tbm_order_item (
+  2  	 orderid NUMBER,
+  3  	 productid NUMBER,
+  4  	 quantity NUMBER NOT NULL CONSTRAINT SYS_ORDER_ITEM_QUANTITY_CK CHECK (quantity > 0),
+  5  	 CONSTRAINT SYS_ORDER_ITEM_PK PRIMARY KEY (orderid, productid),
+  6  	 CONSTRAINT SYS_ORDER_ORDER_ITEM_FK FOREIGN KEY (orderid) REFERENCES tbm_order(orderid),
+  7  	 CONSTRAINT SYS_PRODUCT_ORDER_ITEM_FK FOREIGN KEY (productid) REFERENCES tbm_product(productid)
+  8   );
+
+Table created.
+
+SQL> 
+SQL> SPOOL off
